@@ -38,3 +38,18 @@ class LoginModel():
             return affected_rows
         except Exception as ex:
             raise Exception(ex)
+        
+    @classmethod
+    def delete_login_by_correo(self, correo):
+        try:
+            connection = get_connection()
+
+            with connection.cursor() as cursor:
+                cursor.execute("""DELETE FROM public."login" WHERE correo = %s""", (correo,))
+                affected_rows = cursor.rowcount
+                connection.commit()
+
+            connection.close()
+            return affected_rows
+        except Exception as ex:
+            raise Exception(ex)

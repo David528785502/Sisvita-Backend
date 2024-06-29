@@ -1,5 +1,3 @@
-from werkzeug.security import check_password_hash
-
 class Especialista():
 
     def __init__(self, id_especialista, nombre_perfil=None, correo=None, contrasenna=None, dni=None, nombres=None, apellidos=None, numero_colegiatura=None) -> None:
@@ -23,7 +21,3 @@ class Especialista():
             'apellidos': self.apellidos,
             'numero_colegiatura': self.numero_colegiatura
         }
-
-    @classmethod
-    def check_password(self, hashed_password, password):
-        return check_password_hash(hashed_password, password)

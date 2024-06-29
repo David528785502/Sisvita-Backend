@@ -44,6 +44,25 @@ class EspecialistaModel():
             raise Exception(ex)
 
     @classmethod
+    def get_especialista_by_correo(cls, correo):
+        try:
+            connection = get_connection()
+            especialista = None
+
+            with connection.cursor() as cursor:
+                cursor.execute("""SELECT id_especialista, nombre_perfil, correo, contrasenna, dni, nombres, apellidos, numero_colegiatura FROM public."especialista" WHERE correo = %s""", (correo,))
+                row = cursor.fetchone()
+
+                if row is not None:
+                    especialista = Especialista(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+                    especialista = especialista.to_JSON()
+
+            connection.close()
+            return especialista
+        except Exception as ex:
+            raise Exception(ex)
+                
+    @classmethod
     def add_especialista(self, especialista):
         try:
             connection = get_connection()
@@ -64,42 +83,6 @@ class EspecialistaModel():
             raise Exception(ex)
 
     @classmethod
-    def get_especialista_by_correo(cls, correo):
-        try:
-            connection = get_connection()
-
-            with connection.cursor() as cursor:
-                cursor.execute("""SELECT id_especialista, nombre_perfil, correo, contrasenna, dni, nombres, apellidos, numero_colegiatura 
-                                FROM public."especialista" WHERE correo = %s""", (correo,))
-                row = cursor.fetchone()
-
-                especialista = None
-                if row:
-                    especialista = Especialista(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
-
-            connection.close()
-            return especialista
-
-        except Exception as ex:
-            raise Exception(ex)
-
-    @classmethod
-    def update_especialista(self, especialista):
-        try:
-            connection = get_connection()
-
-            with connection.cursor() as cursor:
-                cursor.execute("""UPDATE public."especialista" SET nombre_perfil = %s, correo = %s, contrasenna = %s, dni = %s, nombres = %s, apellidos = %s, numero_colegiatura = %s  
-                                WHERE id_especialista = %s""", (especialista.nombre_perfil, especialista.correo, especialista.contrasenna, especialista.dni, especialista.nombres, especialista.apellidos, especialista.numero_colegiatura, especialista.id_especialista))
-                affected_rows = cursor.rowcount
-                connection.commit()
-
-            connection.close()
-            return affected_rows
-        except Exception as ex:
-            raise Exception(ex)
-
-    @classmethod
     def delete_especialista(self, especialista):
         try:
             connection = get_connection()
@@ -108,6 +91,8 @@ class EspecialistaModel():
                 cursor.execute("""DELETE FROM public."especialista" WHERE id_especialista = %s""", (especialista.id_especialista,))
                 affected_rows = cursor.rowcount
                 connection.commit()
+
+                LoginModel.delete_login_by_correo(especialista.correo)
 
             connection.close()
             return affected_rows

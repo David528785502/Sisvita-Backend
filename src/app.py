@@ -3,7 +3,7 @@ from flask_cors import CORS
 import os
 
 # Routes
-from routes import Usuario, Especialista, Login
+from routes import Usuario, Especialista, Login, Test, Resultado
 
 app = Flask(__name__)
 CORS(app)
@@ -16,6 +16,8 @@ if __name__ == '__main__':
     app.register_blueprint(Usuario.main, url_prefix='/api/usuarios')
     app.register_blueprint(Especialista.main, url_prefix='/api/especialistas')
     app.register_blueprint(Login.main, url_prefix='/api/login')
+    app.register_blueprint(Test.main, url_prefix='/api/tests')
+    app.register_blueprint(Resultado.main, url_prefix='/api/resultados')
 
     # Error handlers
     app.register_error_handler(404, page_not_found)

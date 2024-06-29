@@ -1,4 +1,3 @@
-from werkzeug.security import check_password_hash
 from utils.DateFormat import DateFormat
 
 class Usuario():
@@ -22,7 +21,3 @@ class Usuario():
             'fecha_nacimiento': DateFormat.convert_date(self.fecha_nacimiento),
             'ubigeo': self.ubigeo
             }
-
-    @classmethod
-    def check_password(self, hashed_password, password):
-        return check_password_hash(hashed_password, password)

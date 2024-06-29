@@ -42,6 +42,25 @@ class UsuarioModel():
             return usuario
         except Exception as ex:
             raise Exception(ex)
+        
+    @classmethod
+    def get_usuario_by_correo(cls, correo):
+        try:
+            connection = get_connection()
+            usuario = None
+
+            with connection.cursor() as cursor:
+                cursor.execute("""SELECT id_usuario, nombre_perfil, contrasenna, correo, numero, fecha_nacimiento, ubigeo FROM public."usuario" WHERE correo = %s""", (correo,))
+                row = cursor.fetchone()
+
+                if row is not None:
+                    usuario = Usuario(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+                    usuario = usuario.to_JSON()
+
+            connection.close()
+            return usuario
+        except Exception as ex:
+            raise Exception(ex)
 
     @classmethod
     def add_usuario(self, usuario):
@@ -57,43 +76,6 @@ class UsuarioModel():
                 if affected_rows == 1:
                     login_entry = Login(None, usuario.correo, usuario.contrasenna, 3)
                     LoginModel.add_login(login_entry)
-
-            connection.close()
-            return affected_rows
-        except Exception as ex:
-            raise Exception(ex)
-        
-    @classmethod
-    def get_usuario_by_correo(cls, correo):
-        try:
-            connection = get_connection()
-
-            with connection.cursor() as cursor:
-                cursor.execute("""SELECT id_usuario, nombre_perfil, contrasenna, correo, numero, fecha_nacimiento, ubigeo 
-                                FROM public."usuario" WHERE correo = %s""", (correo,))
-                row = cursor.fetchone()
-
-                usuario = None
-                if row:
-                    usuario = Usuario(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
-
-            connection.close()
-            return usuario
-
-        except Exception as ex:
-            raise Exception(ex)
-
-
-    @classmethod
-    def update_usuario(self, usuario):
-        try:
-            connection = get_connection()
-
-            with connection.cursor() as cursor:
-                cursor.execute("""UPDATE public."usuario" SET nombre_perfil = %s, contrasenna = %s, correo = %s, numero = %s, fecha_nacimiento =%s, ubigeo =%s  
-                                WHERE id_usuario = %s""", (usuario.id_usuario, usuario.nombre_perfil, usuario.contrasenna, usuario.correo, usuario.numero, usuario.fecha_nacimiento. usuario.ubigeo))
-                affected_rows = cursor.rowcount
-                connection.commit()
 
             connection.close()
             return affected_rows
