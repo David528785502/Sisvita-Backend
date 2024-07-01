@@ -1,73 +1,61 @@
 from database.db import get_connection
-from models.entities.Test import Test
-from models.entities.Pregunta import Pregunta
+from .entities.Test import Test
 
-class TestModel:
+class TestModel():
 
     @classmethod
     def get_tests(cls):
         try:
             connection = get_connection()
             tests = []
-
             with connection.cursor() as cursor:
-                cursor.execute("""SELECT id_test, nombre, descripcion FROM tests""")
+                cursor.execute("""SELECT id_test, nombre, descripcion FROM public."test" """)
                 resultset = cursor.fetchall()
-
                 for row in resultset:
                     test = Test(row[0], row[1], row[2])
-                    test.preguntas = cls.get_preguntas(test.id_test)
-                    tests.append(test)  # Append the test instance
-
+                    tests.append(test.to_JSON())
             connection.close()
-            return [test.to_JSON() for test in tests]  # Convert to JSON here
+            return tests
         except Exception as ex:
-            raise Exception(ex)
+            raise Exception("Failed to fetch tests: " + str(ex))
 
     @classmethod
-    def get_preguntas(cls, test_id):
+    def get_test(cls, id_test):
         try:
             connection = get_connection()
-            preguntas = []
-
             with connection.cursor() as cursor:
-                cursor.execute("""SELECT id_pregunta, texto, opciones FROM preguntas WHERE id_test = %s""", (test_id,))
-                resultset = cursor.fetchall()
-
-                for row in resultset:
-                    pregunta = Pregunta(row[0], row[1], row[2], test_id)
-                    preguntas.append(pregunta)  # Append the pregunta instance
-
+                cursor.execute("""SELECT id_test, nombre, descripcion FROM public."test" WHERE id_test = %s""", (id_test,))
+                row = cursor.fetchone()
+                if row:
+                    test = Test(row[0], row[1], row[2])
+                    return test.to_JSON()
             connection.close()
-            return preguntas
+            return None
         except Exception as ex:
-            raise Exception(ex)
+            raise Exception("Failed to fetch test: " + str(ex))
 
     @classmethod
     def add_test(cls, test):
         try:
             connection = get_connection()
-
             with connection.cursor() as cursor:
-                cursor.execute("""INSERT INTO tests (nombre, descripcion) VALUES (%s, %s) RETURNING id_test""", (test.nombre, test.descripcion))
-                test_id = cursor.fetchone()[0]
+                cursor.execute("""INSERT INTO public."test" (nombre, descripcion) VALUES (%s, %s)""", (test.nombre, test.descripcion))
+                affected_rows = cursor.rowcount
                 connection.commit()
-
             connection.close()
-            return test_id
+            return affected_rows == 1
         except Exception as ex:
-            raise Exception(ex)
+            raise Exception("Failed to add test: " + str(ex))
 
     @classmethod
-    def add_pregunta(cls, pregunta):
+    def delete_test(cls, id_test):
         try:
             connection = get_connection()
-
             with connection.cursor() as cursor:
-                cursor.execute("""INSERT INTO preguntas (texto, opciones, id_test) VALUES (%s, %s, %s)""", (pregunta.texto, pregunta.opciones, pregunta.id_test))
+                cursor.execute("""DELETE FROM public."test" WHERE id_test = %s""", (id_test,))
+                affected_rows = cursor.rowcount
                 connection.commit()
-
             connection.close()
-            return True
+            return affected_rows == 1
         except Exception as ex:
-            raise Exception(ex)
+            raise Exception("Failed to delete test: " + str(ex))

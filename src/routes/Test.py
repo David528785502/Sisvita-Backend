@@ -1,57 +1,49 @@
 from flask import Blueprint, jsonify, request
-from models.entities.Test import Test
-from models.entities.Pregunta import Pregunta
 from models.TestModel import TestModel
+from models.entities.Test import Test
+from models.PreguntaModel import PreguntaModel
+from models.entities.Pregunta import Pregunta
 
 main = Blueprint('test_blueprint', __name__)
 
-@main.route('/tests', methods=['GET'])
+@main.route('/')
 def get_tests():
     try:
         tests = TestModel.get_tests()
-        return jsonify(tests), 200
+        return jsonify(tests)
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
 
-@main.route('/tests', methods=['POST'])
+@main.route('/<id_test>')
+def get_test(id_test):
+    try:
+        test = TestModel.get_test(id_test)
+        if test:
+            return jsonify(test)
+        else:
+            return jsonify({'message': "Test not found"}), 404
+    except Exception as ex:
+        return jsonify({'message': str(ex)}), 500
+
+@main.route('/add', methods=['POST'])
 def add_test():
     try:
-        data = request.json
-        test = Test(0, data['nombre'], data['descripcion'])
-        test_id = TestModel.add_test(test)
-        if test_id:
-            for pregunta in data['preguntas']:
-                nueva_pregunta = Pregunta(0, pregunta['texto'], pregunta['opciones'], test_id)
-                TestModel.add_pregunta(nueva_pregunta)
-            return jsonify({'message': 'Test added successfully'}), 201
+        nombre = request.json['nombre']
+        descripcion = request.json['descripcion']
+        test = Test(None, nombre, descripcion)
+        if TestModel.add_test(test):
+            return jsonify({'message': "Test added successfully"})
         else:
-            return jsonify({'message': 'Failed to add test'}), 500
+            return jsonify({'message': "Failed to add test"}), 500
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
-    
-@main.route('/tests/resultados', methods=['POST'])
-def submit_test_result():
+
+@main.route('/delete/<id_test>', methods=['DELETE'])
+def delete_test(id_test):
     try:
-        data = request.get_json()
-        test_id = data.get('testId')
-        respuestas = data.get('respuestas')
-
-        # Lógica para procesar las respuestas y calcular el resultado
-
-        resultado = calcular_resultado(test_id, respuestas)
-
-        return jsonify({'message': 'Test submitted successfully', 'resultado': resultado})
+        if PreguntaModel.delete_preguntas_by_test(id_test) and TestModel.delete_test(id_test):
+            return jsonify({'message': "Test deleted successfully"})
+        else:
+            return jsonify({'message': "Failed to delete test or test not found"}), 404
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
-
-def calcular_resultado(test_id, respuestas):
-    # Lógica de procesamiento del test
-    # Puedes implementar tu lógica de cálculo aquí
-    # Por ejemplo, contar respuestas correctas, calcular puntaje, etc.
-    # Devuelve un resultado basado en las respuestas
-    return {
-        'testId': test_id,
-        'resultado': 'Tu nivel de ansiedad es moderado',
-        'color': 'amarillo'  # Verde, amarillo o rojo según el resultado
-    }
-
