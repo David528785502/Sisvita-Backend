@@ -23,7 +23,7 @@ if __name__ == '__main__':
     app.register_blueprint(TestTomadoTemporal.main, url_prefix='/api/test_tomado_temporal')
     app.register_blueprint(Respuesta.main, url_prefix='/api/respuestas')
     app.register_blueprint(Resultado.main, url_prefix='/api/resultados')
-    app.register_blueprint(Coordenada.main, url_prefix='/api/coordenadas')
+    app.register_blueprint(Coordenada.main, url_prefix='/api/resultados')
 
     # Error handlers
     app.register_error_handler(404, page_not_found)
