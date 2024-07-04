@@ -51,3 +51,14 @@ def delete_test(id_test_tomado_temporal):
             return jsonify({'message': "Test does not exist, could not be deleted"}), 404
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
+    
+@main.route('/last')
+def get_last_test():
+    try:
+        last_test = TestTomadoTemporalModel.get_last_test()
+        if last_test is not None:
+            return jsonify(last_test)
+        else:
+            return jsonify({'message': "No tests found"}), 404
+    except Exception as ex:
+        return jsonify({'message': str(ex)}), 500

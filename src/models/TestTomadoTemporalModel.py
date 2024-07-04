@@ -70,3 +70,22 @@ class TestTomadoTemporalModel:
             return affected_rows
         except Exception as ex:
             raise Exception(ex)
+
+    @classmethod
+    def get_last_test(cls):
+        try:
+            connection = get_connection()
+
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT id_test_tomado_temporal FROM public.test_tomado_temporal ORDER BY id_test_tomado_temporal DESC LIMIT 1")
+                row = cursor.fetchone()
+
+                test = None
+                if row is not None:
+                    test = TestTomadoTemporal(row[0])
+                    test = test.to_JSON()
+
+            connection.close()
+            return test
+        except Exception as ex:
+            raise Exception(ex)
