@@ -3,7 +3,7 @@ from flask_cors import CORS
 import os
 
 # Routes
-from routes import Coordenada
+from routes import Login
 
 app = Flask(__name__)
 CORS(app)
@@ -13,7 +13,7 @@ def page_not_found(error):
 
 if __name__ == '__main__':
     # Blueprints
-    app.register_blueprint(Coordenada.main, url_prefix='/api/coordenadas')
+    app.register_blueprint(Login.main, url_prefix='/api/login')
 
     # Error handlers
     app.register_error_handler(404, page_not_found)
